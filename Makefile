@@ -60,4 +60,4 @@ test:
 .PHONY: all
 all:
 	@make -s bin test verify sec
-:
+
