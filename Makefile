@@ -3,7 +3,7 @@
 .DEFAULT_GOAL := all
 PLATFORMS := linux/amd64 darwin/amd64 windows/amd64
 
-LD_FLAGS := -ldflags "-X main.Version=`git describe` -X main.BuildDate=`date -u +%Y-%m-%d_%H:%M:%S` -X main.GitHash=`git rev-parse HEAD`"
+LD_FLAGS := -ldflags "-X main.Version=`git describe --tags` -X main.BuildDate=`date -u +%Y-%m-%d_%H:%M:%S` -X main.GitHash=`git rev-parse HEAD`"
 
 temp = $(subst /, ,$@)
 os = $(word 1, $(temp))
@@ -14,6 +14,7 @@ setup:
 	@go get golang.org/x/lint/golint@v0.0.0-20201208152925-83fdc39ff7b5
 	@go get golang.org/x/tools/cmd/goimports@v0.0.0-20210104081019-d8d6ddbec6ee
 	@go get github.com/securego/gosec/v2@v2.5.0
+	@go mod download
 
 GOFILES=$(shell find . -type f -name '*.go' -not -path "./.git/*")
 
