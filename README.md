@@ -6,8 +6,6 @@ ASL is a cli to get the STS short-term credentials for all accounts and role nam
 
 ASL retrieves and caches an AWS SSO access token to exchange for AWS credentials, when the cached access token expires, a new login is requested. Using a valid access token, the ASL lists all AWS accounts assigned to the user and then get the roles for each one. After that, the STS short-term credentials are stored in AWS credential file.
 
-Note: ASL override all content of AWS credential file (`$HOME/.aws/credentials`). If you need to preserve the current contet, use the `--backup` flag to back up.
-
 ## Prerequisites
 
 * [AWS Command Line Interface](https://aws.amazon.com/cli/)

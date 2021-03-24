@@ -42,7 +42,7 @@ verify:
 
 .PHONY: sec
 sec:
-	@gosec -exclude=G401,G204,G505 -quiet ./...
+	@gosec -exclude=G401,G204,G505,G101 -quiet ./...
 
 .PHONY: bin
 bin:

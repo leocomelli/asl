@@ -13,26 +13,19 @@ import (
 
 	"github.com/mitchellh/go-homedir"
 	logger "github.com/rs/zerolog/log"
+	"gopkg.in/ini.v1"
 )
 
 const (
-	awsSSOPath       = "sso"
-	awsSSOConfigTmpl = `[profile {{ .RoleName }}]
-sso_start_url = {{ .StartURL }}
-sso_region = {{ .Region }}
-sso_account_id = {{ .AccountID }}
-sso_role_name = {{ .RoleName }}
-region = {{ .Region }}
-output = json
-`
-	awsCredTmpl = `[{{ .ProfileName }}]
-output = json
-region = {{ .Region }}
-aws_access_key_id = {{ .AccessKeyID }}
-aws_secret_access_key = {{ .SecretAccessKey }}
-aws_session_token = {{ .SessionToken }}
-
-`
+	awsSSOPath            = "sso"
+	keyRegion             = "region"
+	keySSOUrl             = "sso_start_url"
+	keySSORegion          = "sso_region"
+	keySSOAccountID       = "sso_account_id"
+	keySSORoleName        = "sso_role_name"
+	keyCrdAccessKeyID     = "aws_access_key_id"
+	keyCrdSecretAccessKey = "aws_secret_access_key"
+	keyCrdSessionToken    = "aws_session_token"
 )
 
 var awsPath string
@@ -167,7 +160,17 @@ func (a *SSO) PersistConfig() error {
 		logger.Info().Str("path", filename).Msg("backup completed successfully")
 	}
 
-	if err := config.WriteTemplate(awsSSOConfigTmpl, a); err != nil {
+	cfg, _ := ini.LooseLoad(config.FullName)
+
+	s := cfg.Section(fmt.Sprintf("profile %s", a.RoleName))
+	s.Key("output").SetValue("json")
+	s.Key(keyRegion).SetValue(a.Region)
+	s.Key(keySSOUrl).SetValue(a.StartURL)
+	s.Key(keySSORegion).SetValue(a.Region)
+	s.Key(keySSOAccountID).SetValue(a.AccountID)
+	s.Key(keySSORoleName).SetValue(a.RoleName)
+
+	if err := cfg.SaveTo(config.FullName); err != nil {
 		return err
 	}
 
@@ -294,12 +297,18 @@ func (a *SSO) PersistCredentials(creds []*Credential) (*CredentialResultInfo, er
 		logger.Info().Str("path", filename).Msg("backup completed successfully")
 	}
 
-	var data []interface{}
+	cfg, _ := ini.LooseLoad(cred.FullName)
+
 	for _, c := range creds {
-		data = append(data, c)
+		s := cfg.Section(c.ProfileName)
+		s.Key("output").SetValue("json")
+		s.Key(keyRegion).SetValue(c.Region)
+		s.Key(keyCrdAccessKeyID).SetValue(c.AccessKeyID)
+		s.Key(keyCrdSecretAccessKey).SetValue(c.SecretAccessKey)
+		s.Key(keyCrdSessionToken).SetValue(c.SessionToken)
 	}
 
-	if err := cred.WriteTemplateSlice(awsCredTmpl, data); err != nil {
+	if err := cfg.SaveTo(cred.FullName); err != nil {
 		return nil, err
 	}
 
