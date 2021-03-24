@@ -40,12 +40,13 @@ type SSOCredential struct {
 
 // SSO implements the flow to retrieve the AWS SSO credentials
 type SSO struct {
-	Cmd        SSOCommand `json:"-"`
-	AccountID  string     `json:"accountId"`
-	RoleName   string     `json:"roleName"`
-	StartURL   string     `json:"startUrl"`
-	Region     string     `json:"region"`
-	BackupFile bool       `json:"-"`
+	Cmd           SSOCommand `json:"-"`
+	AccountID     string     `json:"accountId"`
+	RoleName      string     `json:"roleName"`
+	StartURL      string     `json:"startUrl"`
+	Region        string     `json:"region"`
+	BackupFile    bool       `json:"-"`
+	ForceSSOLogin bool       `json:"-"`
 }
 
 // Accounts defines the structure returned by AWS Cli
@@ -103,6 +104,7 @@ func NewSSO(cmd SSOCommand, c *ConfigOptions) *SSO {
 		c.StartURL,
 		c.Region,
 		c.BackupFile,
+		c.ForceSSOLogin,
 	}
 }
 
@@ -179,9 +181,22 @@ func (a *SSO) PersistConfig() error {
 	return nil
 }
 
+func (a *SSO) loginRetry(v []bool) bool {
+	return len(v) > 0 && v[0]
+}
+
 // Login checks if the sso cache file is valid,
 // when cache credential has expired forces a login
 func (a *SSO) Login(retry ...bool) (*SSOCredential, error) {
+	if a.ForceSSOLogin || a.loginRetry(retry) {
+		_, err := a.Cmd.Login(a.RoleName)
+		if err != nil {
+			return nil, err
+		}
+
+		logger.Info().Msg("the aws sso cache file has been updated successfully")
+	}
+
 	c, err := a.ReadCacheFile()
 
 	if err != nil && !os.IsNotExist(err) {
@@ -193,16 +208,9 @@ func (a *SSO) Login(retry ...bool) (*SSOCredential, error) {
 		return c, nil
 	}
 
-	if len(retry) > 0 && retry[0] {
+	if a.loginRetry(retry) {
 		return nil, errors.New("can not renew the sso token")
 	}
-
-	_, err = a.Cmd.Login(a.RoleName)
-	if err != nil {
-		return nil, err
-	}
-
-	logger.Info().Msg("the aws sso cache file has been updated successfully")
 
 	return a.Login(true)
 }

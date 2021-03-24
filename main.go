@@ -11,6 +11,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// Options defines root command options
+type Options struct {
+	Backup        bool
+	EKS           bool
+	ForceSSOLogin bool
+}
+
 var (
 	// Version contains the current version of the app.
 	Version = ""
@@ -19,8 +26,7 @@ var (
 	// GitHash contains the hash of last commit in the repository.
 	GitHash = ""
 
-	backup bool
-	eks    bool
+	opts = &Options{}
 )
 
 const (
@@ -49,12 +55,10 @@ func main() {
 		Short: "Get credentials for all accounts for which you have permission in AWS SSO",
 		Long:  ``,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cfg, err := LoadConfig()
+			cfg, err := LoadConfig(opts)
 			if err != nil {
 				return err
 			}
-
-			cfg.BackupFile = backup
 
 			sso := NewSSO(&SSOCli{}, cfg)
 			err = sso.PersistConfig()
@@ -84,8 +88,8 @@ func main() {
 			ssoMsg := fmt.Sprintf(ssoMsgTmpl, res.Filename)
 
 			var eksMsg string
-			if eks {
-				eks := NewEKS(&EKSCli{}, backup)
+			if opts.EKS {
+				eks := NewEKS(&EKSCli{}, cfg)
 				err := eks.UpdateKubeConfig(c)
 				if err != nil {
 					return err
@@ -101,8 +105,9 @@ func main() {
 	}
 
 	rootCmd.PersistentFlags().StringP("loglevel", "d", "info", "set log level [info|debug|trace]")
-	rootCmd.PersistentFlags().BoolVarP(&backup, "backup", "b", false, "force a back up of the configuration files [.aws/config|.aws/credentials|.kube/config]")
-	rootCmd.PersistentFlags().BoolVarP(&eks, "eks", "k", false, "configure kubectl so that you can connect to an Amazon EKS cluster")
+	rootCmd.PersistentFlags().BoolVarP(&opts.Backup, "backup", "b", false, "force a back up of the configuration files [.aws/config|.aws/credentials|.kube/config]")
+	rootCmd.PersistentFlags().BoolVarP(&opts.EKS, "eks", "k", false, "configure kubectl so that you can connect to an Amazon EKS cluster")
+	rootCmd.PersistentFlags().BoolVarP(&opts.ForceSSOLogin, "login", "l", false, "force login to review the SSO access token")
 
 	logger.Logger = logger.Output(zerolog.ConsoleWriter{Out: os.Stderr})
 	setLogLevel(os.Args)

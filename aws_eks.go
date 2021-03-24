@@ -23,11 +23,11 @@ type EKS struct {
 }
 
 // NewEKS returns a new EKS
-func NewEKS(cmd EKSCommand, backup bool) *EKS {
+func NewEKS(cmd EKSCommand, c *ConfigOptions) *EKS {
 	return &EKS{
 		Cmd:            cmd,
 		KubeConfigPath: kubeConfig,
-		BackupFile:     backup,
+		BackupFile:     c.BackupFile,
 	}
 }
 

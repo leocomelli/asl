@@ -14,11 +14,12 @@ var aslPath string
 
 // ConfigOptions defines the ASL options
 type ConfigOptions struct {
-	AccountID  string `json:"accountId"`
-	RoleName   string `json:"roleName"`
-	StartURL   string `json:"startUrl"`
-	Region     string `json:"region"`
-	BackupFile bool   `json:"-"`
+	AccountID     string `json:"accountId"`
+	RoleName      string `json:"roleName"`
+	StartURL      string `json:"startUrl"`
+	Region        string `json:"region"`
+	BackupFile    bool   `json:"-"`
+	ForceSSOLogin bool   `json:"-"`
 }
 
 func configureCmd(ctx context.Context) *cobra.Command {
@@ -67,7 +68,7 @@ func Configure(o *ConfigOptions) error {
 }
 
 // LoadConfig reads the ASL parameters
-func LoadConfig() (*ConfigOptions, error) {
+func LoadConfig(opts *Options) (*ConfigOptions, error) {
 	config := NewFile(aslPath)
 
 	if !config.Exists() {
@@ -81,6 +82,9 @@ func LoadConfig() (*ConfigOptions, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	data.BackupFile = opts.Backup
+	data.ForceSSOLogin = opts.ForceSSOLogin
 
 	logger.Debug().Interface("data", data).Msg("the asl config file has been successfully read")
 
