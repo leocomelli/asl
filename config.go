@@ -42,9 +42,9 @@ func configureCmd(ctx context.Context) *cobra.Command {
 	}
 
 	cmd.Flags().StringVarP(&o.AccountID, "account-id", "a", "", "the AWS account that is assigned to the user")
-	cmd.Flags().StringVarP(&o.RoleName, "role-name", "r", "", "the role name that is assigned to the user")
+	cmd.Flags().StringVarP(&o.RoleName, "role-name", "R", "", "the role name that is assigned to the user")
 	cmd.Flags().StringVarP(&o.StartURL, "start-url", "u", "", "the URL that points to the organization's AWS Single Sign-On (AWS SSO) user portal")
-	cmd.Flags().StringVarP(&o.Region, "region", "l", "", "the region to use")
+	cmd.Flags().StringVarP(&o.Region, "region", "r", "", "the region to use")
 
 	_ = cmd.MarkFlagRequired("account-id")
 	_ = cmd.MarkFlagRequired("role-name")
