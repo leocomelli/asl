@@ -1,0 +1,34 @@
+project_name: asl
+env:
+  - GO111MODULE=on
+  - GOPROXY=https://proxy.golang.org
+before:
+  hooks:
+    - go mod download
+builds:
+  -
+    binary: asl
+    id: asl
+    ldflags: "-X main.Version={{.Version}} -X main.BuildDate={{.Date}} -X main.GitHash={{.Commit}}"
+    env:
+      - CGO_ENABLED=0
+    flags:
+      - -buildmode
+      - exe
+    goos:
+      - darwin
+      - linux
+    goarch:
+      - amd64
+      - arm64
+    goarm:
+      - 7
+archives:
+  -
+    id: asl
+    format: binary
+    name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
+    replacements:
+      darwin: Darwin
+      linux: Linux
+      amd64: x86_64
