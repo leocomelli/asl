@@ -10,6 +10,12 @@ ASL retrieves and caches an AWS SSO access token to exchange for AWS credentials
 
 * [AWS Command Line Interface](https://aws.amazon.com/cli/)
 
+## Installation
+
+```sh
+sudo bash -c "curl -fsSL https://github.com/leocomelli/asl/releases/latest/download/asl_$(uname -s)_$(uname -m) -o /usr/local/bin/asl && chmod +x /usr/local/bin/asl"
+```
+
 ## Usage
 
 Run the `asl configure` command to store the AWS SSO Login parameters to be used when needed. Whenever the AWS SSO access token needs to be renewed, these parameters are used.
