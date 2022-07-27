@@ -10,6 +10,10 @@ import (
 	"time"
 )
 
+const (
+	filePerm os.FileMode = 0600
+)
+
 // File represents the file options
 type File struct {
 	Filename  string
@@ -47,7 +51,7 @@ func (f *File) Backup() (string, error) {
 		return "", err
 	}
 
-	if err := os.WriteFile(bkpFilename, b, 0644); err != nil {
+	if err := os.WriteFile(bkpFilename, b, filePerm); err != nil {
 		return "", err
 	}
 
@@ -91,7 +95,7 @@ func (f *File) ReadJSON(s interface{}) error {
 
 // Write writes the string content in the file
 func (f *File) Write(content string) error {
-	return os.WriteFile(f.FullName, []byte(content), 0644)
+	return os.WriteFile(f.FullName, []byte(content), filePerm)
 }
 
 // WriteJSON writes the json in the file
@@ -101,7 +105,7 @@ func (f *File) WriteJSON(data interface{}) error {
 		return err
 	}
 
-	return os.WriteFile(f.FullName, b, 0644)
+	return os.WriteFile(f.FullName, b, filePerm)
 }
 
 // WriteTemplate writes the struct using a template
@@ -116,7 +120,7 @@ func (f *File) WriteTemplate(tmpl string, data interface{}) error {
 		return err
 	}
 
-	return os.WriteFile(f.FullName, b.Bytes(), 0644)
+	return os.WriteFile(f.FullName, b.Bytes(), filePerm)
 }
 
 // WriteTemplateSlice writes a slice using a template
@@ -133,5 +137,5 @@ func (f *File) WriteTemplateSlice(tmpl string, data []interface{}) error {
 		}
 	}
 
-	return os.WriteFile(f.FullName, b.Bytes(), 0644)
+	return os.WriteFile(f.FullName, b.Bytes(), filePerm)
 }

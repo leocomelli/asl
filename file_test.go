@@ -21,7 +21,7 @@ const (
 
 func createTempFile(data []byte) ([]string, func()) {
 	f, _ := os.CreateTemp(tmpDir, tmpFilename)
-	f.Write(data)
+	_, _ = f.Write(data)
 	return filepath.SplitList(f.Name()), func() {
 		os.Remove(f.Name())
 	}
@@ -80,7 +80,7 @@ func TestWriteTextFile(t *testing.T) {
 	err := f.Write("foo")
 	require.Nil(t, err)
 
-	b, err := os.ReadFile(filename)
+	b, _ := os.ReadFile(filename)
 	require.Equal(t, "foo", string(b))
 }
 
@@ -92,7 +92,7 @@ func TestWriteJSONFile(t *testing.T) {
 	err := f.WriteJSON(&Foo{ID: 1, Name: "foo"})
 	require.Nil(t, err)
 
-	b, err := os.ReadFile(filename)
+	b, _ := os.ReadFile(filename)
 	require.Equal(t, "{\n \"ID\": 1,\n \"Name\": \"foo\"\n}", string(b))
 
 }
@@ -103,7 +103,7 @@ func TestWriteTemplateInFile(t *testing.T) {
 
 	foo := &Foo{ID: 1, Name: "foo"}
 	f := NewFile(filename)
-	f.WriteTemplate("id: {{ .ID }}\nname: {{ .Name }}", foo)
+	_ = f.WriteTemplate("id: {{ .ID }}\nname: {{ .Name }}", foo)
 
 	b, _ := os.ReadFile(filename)
 	require.Equal(t, "id: 1\nname: foo", string(b))
@@ -115,7 +115,7 @@ func TestWriteTemplateSliceInFile(t *testing.T) {
 
 	foo := []interface{}{&Foo{ID: 1, Name: "foo"}, &Foo{ID: 2, Name: "bar"}}
 	f := NewFile(filename)
-	f.WriteTemplateSlice("id: {{ .ID }}\nname: {{ .Name }}", foo)
+	_ = f.WriteTemplateSlice("id: {{ .ID }}\nname: {{ .Name }}", foo)
 
 	b, _ := os.ReadFile(filename)
 	require.Equal(t, "id: 1\nname: fooid: 2\nname: bar", string(b))
@@ -123,7 +123,7 @@ func TestWriteTemplateSliceInFile(t *testing.T) {
 
 func TestBackupFile(t *testing.T) {
 	filename := "/tmp/go-test-bkp"
-	os.WriteFile(filename, []byte("foo"), 0644)
+	_ = os.WriteFile(filename, []byte("foo"), 0644)
 
 	f := NewFile(filename)
 	bkp, _ := f.Backup()
