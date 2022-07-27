@@ -12,6 +12,7 @@ import (
 
 const (
 	filePerm os.FileMode = 0600
+	dirPerm  os.FileMode = 0750
 )
 
 // File represents the file options
@@ -37,6 +38,15 @@ func NewFile(path ...string) *File {
 func (f *File) Exists() bool {
 	_, err := os.Stat(f.FullName)
 	return !os.IsNotExist(err)
+}
+
+// Create a directory, along with any necessary parents
+func (f *File) Create() error {
+	if err := os.MkdirAll(f.Path, dirPerm); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // Backup makes a copy of the file

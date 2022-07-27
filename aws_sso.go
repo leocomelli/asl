@@ -153,6 +153,11 @@ func (a *SSO) PersistConfig() error {
 
 	logger.Debug().Str("path", config.FullName).Msg("preparing to store the aws sso config file")
 
+	// create file on disk when it does not exist
+	if err := config.Create(); err != nil {
+		return err
+	}
+
 	if a.BackupFile {
 		filename, err := config.Backup()
 		if err != nil {
